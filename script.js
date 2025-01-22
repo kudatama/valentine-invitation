@@ -72,7 +72,7 @@ function handleYesClick() {
 function resizeYesButton() {
   const computedStyle = window.getComputedStyle(yesButton);
   const fontSize = parseFloat(computedStyle.getPropertyValue("font-size"));
-  const newFontSize = fontSize * 1.5;
+  const newFontSize = fontSize * 1.35;
 
   yesButton.style.fontSize = `${newFontSize}px`;
 }
