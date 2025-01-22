@@ -53,7 +53,7 @@ function resizeYesButton() {
   // Only resize the "Yes" button if we haven't reached the max "No" clicks
   if (noClickCount < MAX_NO_CLICKS) {
     const currentFontSize = parseFloat(window.getComputedStyle(yesButton).getPropertyValue("font-size"));
-    let newFontSize = currentFontSize * 1.5;
+    let newFontSize = currentFontSize * 1.4;
 
     // Special case for the last "No" click
     if (noClickCount === MAX_NO_CLICKS) {
