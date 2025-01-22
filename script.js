@@ -50,18 +50,15 @@ function playBoomSound() {
 }
 
 function resizeYesButton() {
-  // Only resize the "Yes" button if we haven't reached the max "No" clicks
-  if (noClickCount < MAX_NO_CLICKS) {
-    const currentFontSize = parseFloat(window.getComputedStyle(yesButton).getPropertyValue("font-size"));
-    let newFontSize = currentFontSize * 1.4;
+  const currentFontSize = parseFloat(window.getComputedStyle(yesButton).getPropertyValue("font-size"));
+  let newFontSize = currentFontSize * 1.4; // Default resize
 
-    // Special case for the last "No" click
-    if (noClickCount === MAX_NO_CLICKS) {
-      newFontSize = currentFontSize * 1.4; // Reduce size for the final text
-    }
-
-    yesButton.style.fontSize = `${newFontSize}px`;
+  // Special case: After the last "No" click, expand "Yes" button more
+  if (noClickCount === MAX_NO_CLICKS) {
+    newFontSize = currentFontSize * 0.8; // Increase size more when "Alright fine" is clicked
   }
+
+  yesButton.style.fontSize = `${newFontSize}px`;
 }
 
 function playMusic(startTime, duration = null) {
@@ -99,7 +96,7 @@ noButton.addEventListener("click", () => {
   
   // Play music for the first "No" click
   if (noClickCount === 1) {
-    playMusic(0, 19780); // Play from 0 to 19.5 seconds
+    playMusic(0, 19780); // Play from 0 to 19.780 seconds
   }
 
   // After max "No" clicks, randomize "No" button position for subsequent clicks
