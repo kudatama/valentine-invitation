@@ -6,8 +6,8 @@ const yesButton = document.querySelector(".btn--yes");
 const noButton = document.querySelector(".btn--no");
 const catImg = document.querySelector(".cat-img");
 
-// Select the main music element
-const audio = document.getElementById("valentine-music");
+// Select the audio elements
+const boomAudio = new Audio('boom.mp3'); // Use boom sound
 
 const MAX_IMAGES = 5;
 
@@ -24,7 +24,6 @@ const yesTexts = [
   "Alright fine." // After 5th "No"
 ];
 
-// Handle "No" button click
 noButton.addEventListener("click", function () {
   if (play) {
     noCount++;
@@ -39,11 +38,8 @@ noButton.addEventListener("click", function () {
     resizeYesButton();
     updateNoButtonText();
 
-    // Play the boom sound effect on every click, without delay
-    const boomAudio = new Audio('boom.mp3');  // Create a new Audio object each time
-    boomAudio.play().catch((error) => {
-      console.error("Error playing boom sound:", error);
-    });
+    // Play the "boom" sound starting at 0.25 seconds into the sound
+    playBoomSound();
 
     // Stop further interactions after reaching MAX_IMAGES
     if (noCount === MAX_IMAGES) {
@@ -52,7 +48,6 @@ noButton.addEventListener("click", function () {
   }
 });
 
-// Handle "Yes" button click
 yesButton.addEventListener("click", handleYesClick);
 
 function handleYesClick() {
@@ -61,6 +56,7 @@ function handleYesClick() {
   changeImage("yes");
 
   // Set the audio to start at 20 seconds
+  const audio = document.getElementById("valentine-music");
   if (audio) {
     audio.currentTime = 19.75; // Start the audio at 20 seconds
     audio.play().catch((error) => {
@@ -69,10 +65,20 @@ function handleYesClick() {
   }
 }
 
+function playBoomSound() {
+  boomAudio.currentTime = 0.2; // Start the boom sound at 0.25 seconds
+  boomAudio.play(); // Play the sound from the 0.25 second mark
+}
+
 function resizeYesButton() {
   const computedStyle = window.getComputedStyle(yesButton);
   const fontSize = parseFloat(computedStyle.getPropertyValue("font-size"));
-  const newFontSize = fontSize * 1.35;
+  let newFontSize = fontSize * 1.5;
+
+  // Adjust the font size for "Alright fine." so it isn't too big
+  if (noCount === MAX_IMAGES) {
+    newFontSize = fontSize * 1.1; // Reduce the size when "Alright fine." appears
+  }
 
   yesButton.style.fontSize = `${newFontSize}px`;
 }
@@ -84,7 +90,7 @@ function generateMessage(noCount) {
     "Why not?",
     "Don't do this to me >:(",
     "Please... ",
-    "): Okay.. I'll just cry in the corner.",
+    "I'll just cry in the corner.",
   ];
 
   const messageIndex = Math.min(noCount, messages.length - 1);
