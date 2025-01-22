@@ -57,7 +57,7 @@ function resizeYesButton() {
 
     // Special case for the last "No" click
     if (noClickCount === MAX_NO_CLICKS) {
-      newFontSize = currentFontSize * 1.1; // Reduce size for the final text
+      newFontSize = currentFontSize * 1.4; // Reduce size for the final text
     }
 
     yesButton.style.fontSize = `${newFontSize}px`;
@@ -99,7 +99,7 @@ noButton.addEventListener("click", () => {
   
   // Play music for the first "No" click
   if (noClickCount === 1) {
-    playMusic(0, 19500); // Play from 0 to 19.5 seconds
+    playMusic(0, 19780); // Play from 0 to 19.5 seconds
   }
 
   // After max "No" clicks, randomize "No" button position for subsequent clicks
