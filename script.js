@@ -1,107 +1,125 @@
 "use strict";
 
+// DOM Elements
 const titleElement = document.querySelector(".title");
 const buttonsContainer = document.querySelector(".buttons");
 const yesButton = document.querySelector(".btn--yes");
 const noButton = document.querySelector(".btn--no");
 const catImg = document.querySelector(".cat-img");
 
-// Select the audio elements
-const boomAudio = new Audio('boom.mp3'); // Use boom sound
+// Audio Elements
+const boomAudio = new Audio('boom.mp3'); // Sound when "No" is clicked
+const valentineAudio = document.getElementById("valentine-music"); // Background music
 
-const MAX_IMAGES = 5;
+const MAX_NO_CLICKS = 5; // Maximum "No" clicks before stopping interaction
+let noClickCount = 0; // Tracks how many times "No" was clicked
+let interactionsEnabled = true; // Controls whether further interactions are allowed
 
-let play = true;
-let noCount = 0;
-
-// Array of "Yes" button texts corresponding to "No" click counts
-const yesTexts = [
-  "Yes",          // Initial text
-  "Yeah",         // After 1st "No"
-  "Just kidding", // After 2nd "No"
-  "Okay",         // After 3rd "No"
-  "Fine",         // After 4th "No"
-  "Alright fine." // After 5th "No"
+// Text and messages
+const yesButtonTexts = ["Yes", "No", "Just kidding", "Okay", "Fine", "Alright fine."];
+const noButtonMessages = [
+  "No",
+  "Are you sure?",
+  "Why not?",
+  "Don't do this to me >:(",
+  "Please...",
+  "I'll just cry in the corner."
 ];
 
-noButton.addEventListener("click", function () {
-  if (play) {
-    noCount++;
-
-    // Update the "Yes" button text based on the noCount
-    if (noCount < yesTexts.length) {
-      yesButton.textContent = yesTexts[noCount];
-    }
-
-    const imageIndex = Math.min(noCount, MAX_IMAGES);
-    changeImage(imageIndex);
-    resizeYesButton();
-    updateNoButtonText();
-
-    // Play the "boom" sound starting at 0.25 seconds into the sound
-    playBoomSound();
-
-    // Stop further interactions after reaching MAX_IMAGES
-    if (noCount === MAX_IMAGES) {
-      play = false;
-    }
-  }
-});
-
-yesButton.addEventListener("click", handleYesClick);
-
-function handleYesClick() {
-  titleElement.innerHTML = "Yayyy!! :3";
-  buttonsContainer.classList.add("hidden");
-  changeImage("yes");
-
-  // Set the audio to start at 20 seconds
-  const audio = document.getElementById("valentine-music");
-  if (audio) {
-    audio.currentTime = 19.75; // Start the audio at 20 seconds
-    audio.play().catch((error) => {
-      console.error("Error playing audio:", error);
-    });
-  }
-}
-
-function playBoomSound() {
-  boomAudio.currentTime = 0.2; // Start the boom sound at 0.25 seconds
-  boomAudio.play(); // Play the sound from the 0.25 second mark
-}
-
-function resizeYesButton() {
-  const computedStyle = window.getComputedStyle(yesButton);
-  const fontSize = parseFloat(computedStyle.getPropertyValue("font-size"));
-  let newFontSize = fontSize * 1.5;
-
-  // Adjust the font size for "Alright fine." so it isn't too big
-  if (noCount === MAX_IMAGES) {
-    newFontSize = fontSize * 1.1; // Reduce the size when "Alright fine." appears
-  }
-
-  yesButton.style.fontSize = `${newFontSize}px`;
-}
-
-function generateMessage(noCount) {
-  const messages = [
-    "No",
-    "Are you sure?",
-    "Why not?",
-    "Don't do this to me >:(",
-    "Please... ",
-    "I'll just cry in the corner.",
-  ];
-
-  const messageIndex = Math.min(noCount, messages.length - 1);
-  return messages[messageIndex];
-}
-
-function changeImage(image) {
-  catImg.src = `img/cat-${image}.jpg`;
+// Functions
+function updateYesButtonText() {
+  yesButton.textContent = yesButtonTexts[Math.min(noClickCount, yesButtonTexts.length - 1)];
 }
 
 function updateNoButtonText() {
-  // No button text stays as "No"
-  titleElement.innerHTML = generateMessage(noCount); // Update main message
+  noButton.textContent = noClickCount === 1 ? "Yes" : "No";
 }
+
+function updateTitleMessage() {
+  titleElement.textContent = noButtonMessages[Math.min(noClickCount, noButtonMessages.length - 1)];
+}
+
+function changeCatImage() {
+  const imageIndex = noClickCount <= MAX_NO_CLICKS ? noClickCount : MAX_NO_CLICKS;
+  catImg.src = `img/cat-${imageIndex}.jpg`;
+}
+
+function playBoomSound() {
+  boomAudio.currentTime = 0.2;
+  boomAudio.play(); // Play the boom sound when "No" is clicked
+}
+
+function resizeYesButton() {
+  // Only resize the "Yes" button if we haven't reached the max "No" clicks
+  if (noClickCount < MAX_NO_CLICKS) {
+    const currentFontSize = parseFloat(window.getComputedStyle(yesButton).getPropertyValue("font-size"));
+    let newFontSize = currentFontSize * 1.5;
+
+    // Special case for the last "No" click
+    if (noClickCount === MAX_NO_CLICKS) {
+      newFontSize = currentFontSize * 1.1; // Reduce size for the final text
+    }
+
+    yesButton.style.fontSize = `${newFontSize}px`;
+  }
+}
+
+function playMusic(startTime, duration = null) {
+  if (valentineAudio) {
+    valentineAudio.currentTime = startTime;
+    valentineAudio.play().catch(err => console.error("Error playing music:", err));
+
+    // Optional duration to stop music only during specific actions
+    if (duration) {
+      setTimeout(() => valentineAudio.pause(), duration);
+    }
+  }
+}
+
+function randomizeNoButtonPosition() {
+  const randomX = Math.floor(Math.random() * (window.innerWidth - noButton.offsetWidth));
+  const randomY = Math.floor(Math.random() * (window.innerHeight - noButton.offsetHeight));
+  
+  // Use transform to position the No button randomly
+  noButton.style.position = "absolute"; // Ensure the button is positioned absolutely
+  noButton.style.left = `${randomX}px`;
+  noButton.style.top = `${randomY}px`;
+}
+
+// Event Listeners
+noButton.addEventListener("click", () => {
+  noClickCount++;
+  updateYesButtonText();
+  updateNoButtonText();
+  updateTitleMessage();
+  changeCatImage();
+  resizeYesButton();
+  
+  playBoomSound(); // Always play the boom sound on every "No" click
+  
+  // Play music for the first "No" click
+  if (noClickCount === 1) {
+    playMusic(0, 19500); // Play from 0 to 19.5 seconds
+  }
+
+  // After max "No" clicks, randomize "No" button position for subsequent clicks
+  if (noClickCount === MAX_NO_CLICKS) {
+    interactionsEnabled = false;
+    // No button doesn't randomize yet after the max "No"
+  }
+
+  // For subsequent clicks after max "No", randomize button position
+  if (noClickCount > MAX_NO_CLICKS) {
+    randomizeNoButtonPosition(); // Randomize position of the "No" button after the max "No"
+  }
+});
+
+yesButton.addEventListener("click", () => {
+  // Handles the "Yes" button click
+  titleElement.textContent = "Yayyy!! :3";
+  buttonsContainer.classList.add("hidden");
+  catImg.src = `img/cat-yes.jpg`; // Display the final "Yes" image
+
+  // Resume music from 19.75 seconds until the end
+  playMusic(19.75);
+});
